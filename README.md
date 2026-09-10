@@ -230,19 +230,100 @@ Examples:
 
 ---
 
-# Suggested Development Flow
+# Arquitetura do Projeto
 
-```text
-main
- └── dev
-      ├── feature/*
-      ├── fix/*
-      └── release/*
+## Estrutura de Pastas
+
+```
+src/
+├── main.ts
+├── app.module.ts
+│
+├── config/
+│   ├── configuration.ts
+│   └── env.validation.ts
+│
+├── common/
+│   ├── decorators/
+│   ├── filters/
+│   ├── guards/
+│   ├── interceptors/
+│   ├── pipes/
+│   └── dto/
+│
+├── database/
+│   ├── database.module.ts
+│   └── migrations/
+│
+├── modules/
+│   ├── auth/
+│   │   ├── auth.module.ts
+│   │   ├── auth.controller.ts
+│   │   ├── auth.service.ts
+│   │   ├── strategies/
+│   │   └── dto/
+│   │
+│   └── users/
+│       ├── users.module.ts
+│       ├── users.controller.ts
+│       ├── users.service.ts
+│       ├── entities/
+│       │   └── user.entity.ts
+│       └── dto/
+│           ├── create-user.dto.ts
+│           └── update-user.dto.ts
+│
+└── shared/
+    ├── services/
+    └── utils/
+
+test/
+├── unit/
+└── e2e/
 ```
 
-For emergency fixes:
+## Explicação
 
-```text
-main
- └── hotfix/*
-```
+### `main.ts`
+Ponto de entrada da aplicação. Aqui é feito o bootstrap do NestJS, configuração de pipes globais, CORS, prefixo de rota (`/api`), Swagger, etc.
+
+### `app.module.ts`
+Módulo raiz. Importa `ConfigModule`, `DatabaseModule` e todos os módulos de domínio em `modules/`.
+
+### `config/`
+Centraliza variáveis de ambiente e configuração da aplicação, usando `@nestjs/config`. O `env.validation.ts` valida o `.env` com um schema (Joi ou Zod), evitando que a aplicação suba com variáveis faltando.
+
+### `common/`
+Tudo que é genérico e reutilizável em qualquer módulo, sem regra de negócio:
+- **decorators**: decorators customizados (ex: `@CurrentUser()`)
+- **filters**: exception filters globais (tratamento de erros padronizado)
+- **guards**: guards de autenticação/autorização
+- **interceptors**: logging, transformação de resposta, timeout
+- **pipes**: validação e transformação de dados
+- **dto**: DTOs compartilhados entre módulos (ex: paginação)
+
+### `database/`
+Configuração da conexão com o banco (TypeORM/Prisma) e migrations. Fica isolado do restante para facilitar troca de ORM ou banco no futuro.
+
+### `modules/`
+O coração da aplicação. Cada módulo representa um domínio de negócio e segue sempre o mesmo padrão interno:
+- `*.module.ts` — declara o módulo e suas dependências
+- `*.controller.ts` — camada de entrada HTTP (rotas)
+- `*.service.ts` — regra de negócio
+- `entities/` — modelos de dados/ORM
+- `dto/` — contratos de entrada e saída da API
+
+Essa separação por domínio (em vez de por tipo de arquivo) é o que torna a base escalável: para adicionar uma nova feature, basta criar uma nova pasta em `modules/` seguindo o mesmo padrão, sem tocar no resto do sistema.
+
+### `shared/`
+Serviços e utilitários usados por múltiplos módulos, mas que têm alguma lógica (diferente de `common/`, que é mais estrutural). Ex: serviço de envio de e-mail, serviço de upload de arquivos.
+
+### `test/`
+Testes separados por tipo: `unit/` para testes isolados de service/controller, `e2e/` para testes de fluxo completo da API.
+
+## Por que essa estrutura escala bem
+
+1. **Modularidade por domínio**: cada módulo é praticamente independente, facilitando manutenção e até uma futura extração para microsserviço.
+2. **Baixo acoplamento**: `common/` e `shared/` não conhecem `modules/`, apenas o contrário.
+3. **Fácil onboarding**: qualquer pessoa que conheça o padrão de um módulo (`users/`) sabe onde procurar em qualquer outro.
+4. **Convenção previsível**: sempre `module → controller → service → entity/dto`, sem exceções.
