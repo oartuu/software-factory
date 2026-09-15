@@ -9,3 +9,10 @@ export const user = pgTable('user', {
   createdAt: date('created_at').notNull()
 });
 
+export const group = pgTable('group', {
+  id: uuid('id').primaryKey().defaultRandom().notNull(),
+  authorId: uuid('author_id').references(() => user.id),
+  name: varchar('name').notNull(),
+  paymentStatus: varchar('payment_status').notNull(),
+  createdAt: date('created_at').notNull(),
+});
