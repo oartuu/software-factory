@@ -9,6 +9,14 @@ export const user = pgTable('user', {
   createdAt: date('created_at').notNull()
 });
 
+export const refreshToken = pgTable('refresh_token',{
+  id: uuid('id').primaryKey().defaultRandom().notNull(),
+  userId: uuid('user_id').references(() => user.id),
+  token: text('token').notNull(),
+  expiresAt: date('expires_at').notNull(),
+  createdAt: date('created_at').notNull()
+})
+
 export const group = pgTable('group', {
   id: uuid('id').primaryKey().defaultRandom().notNull(),
   authorId: uuid('author_id').references(() => user.id),
