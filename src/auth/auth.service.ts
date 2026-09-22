@@ -5,12 +5,15 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../drizzle/schema.js';
 import * as bcrypt from 'bcrypt';
 import { eq, or } from 'drizzle-orm';
+import { LoginDto } from './dto/login.dto.js';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject(DRIZZLE)
     private readonly db: NodePgDatabase<typeof schema>,
+    private jwtService: JwtService
   ) {}
 
   async register(dto: RegisterDto) {
@@ -56,4 +59,26 @@ export class AuthService {
 
     return newUser[0];
   }
+
+ async login(dto: LoginDto) {
+
+  const validUser = await this.db.select().from(schema.user).where(eq(schema.user.email, dto.email)).execute();
+  
+  if (validUser.length === 0) {
+    throw new HttpException('Invalid email or password', HttpStatus.UNAUTHORIZED);
+  }
+
+  const passwordMatch = await bcrypt.compare(dto.password, validUser[0].password);
+
+  if (!passwordMatch) {
+    throw new HttpException('Invalid email or password', HttpStatus.UNAUTHORIZED);
+  }
+
+  const payload = { sub: validUser[0].id, email: validUser[0].email, name: validUser[0].name };
+
+  const token = await this.jwtService.signAsync(payload);
+   return {
+     access_token: token,
+   };
+ }
 }
