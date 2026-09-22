@@ -14,4 +14,10 @@ export class GroupController {
   
     return this.groupService.createGroup({ name: dto.name }, req.user!.sub);
   }
+
+  @UseGuards(AuthGuard)
+  @Get('list')
+  getMyGroups(@Req() req: AuthenticatedRequest) {
+    return this.groupService.getGroupsByUserId(req.user!.sub);
+  }
 }
