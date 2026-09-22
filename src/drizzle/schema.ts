@@ -42,10 +42,9 @@ export const group = pgTable('group', {
     .references(() => user.id, { onDelete: 'cascade' })
     .notNull(),
   planId: uuid('plan_id')
-    .references(() => plan.id, { onDelete: 'cascade' })
-    .notNull(),
+    .references(() => plan.id, { onDelete: 'cascade' }),
   name: varchar('name').notNull(),
-  paymentStatus: varchar('payment_status').notNull(),
+  paymentStatus: varchar('payment_status'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
