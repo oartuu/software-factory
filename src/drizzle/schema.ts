@@ -84,7 +84,7 @@ export const event = pgTable('event', {
   name: varchar('name').notNull(),
   startDate: timestamp('start_date').notNull(),
   location: text('location').notNull(),
-  setListsStatus: varchar('set_lists_status').notNull(),
+  setListsStatus: varchar('set_lists_status').default('PENDING').notNull(),
   setlistId: uuid('setlist_id').references(() => setlist.id, {
     onDelete: 'cascade',
   }),
