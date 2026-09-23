@@ -9,6 +9,7 @@ import { DRIZZLE } from '../drizzle/drizzle.module.js';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../drizzle/index.js';
 import { and, eq, inArray } from 'drizzle-orm';
+import { CreateEventDto } from './dto/event.dto.js';
 
 @Injectable()
 export class GroupService {
@@ -115,5 +116,18 @@ export class GroupService {
     });
 
     return { message: 'You have successfully joined the group!' };
+  }
+
+  async createEvent(groupId: string, dto: CreateEventDto) {
+
+    const event = await this.db.insert(schema.event).values({
+      groupId,
+      name: dto.name,
+      startDate: dto.startDate,
+      location: dto.location,
+    }).returning();
+
+    return event;
+
   }
 }
