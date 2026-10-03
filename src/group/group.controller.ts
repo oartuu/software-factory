@@ -3,7 +3,7 @@ import {  AuthGuard } from '../auth/auth.guard.js';
 import type {AuthenticatedRequest,} from '../auth/auth.guard.js';
 import { GroupService } from './group.service.js';
 import { CreateGroupDto } from './dto/create.dto.js';
-import { CreateEventDto } from './dto/event.dto.js';
+
 
 @Controller('group')
 export class GroupController {
@@ -34,13 +34,5 @@ export class GroupController {
     return this.groupService.joinGroup(groupId, userId);
   }
 
-  @UseGuards(AuthGuard)
-  @Post(':id/events')
-  async createEvent(
-    @Param('id') groupId: string,
-    @Body() dto: CreateEventDto,
-    @Req() req: AuthenticatedRequest,
-  ) {
-    return this.groupService.createEvent(groupId, dto);
-  }
+  
 }
