@@ -67,10 +67,38 @@ export class GroupService {
             },
           },
         },
+        events: true
       },
     });
 
     return groups;
+  }
+
+  async getGroupById(groupId: string) {
+    const group = await this.db.query.group.findFirst({
+      where: eq(schema.group.id, groupId),
+      with: {
+        members: {
+          with: {
+            user: {
+              columns: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+              },
+            },
+          },
+        },
+        events: true
+      },
+    });
+
+    if (!group) {
+      throw new NotFoundException('Group not found.');
+    }
+
+    return group;
   }
 
   async generateInviteLink(groupId: string) {

@@ -5,34 +5,35 @@ import { GroupService } from './group.service.js';
 import { CreateGroupDto } from './dto/create.dto.js';
 
 
+@UseGuards(AuthGuard)
 @Controller('group')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
-  @UseGuards(AuthGuard)
   @Post('create')
-  getGroup(@Body() dto: CreateGroupDto, @Req() req: AuthenticatedRequest) {
+  createGroup(@Body() dto: CreateGroupDto, @Req() req: AuthenticatedRequest) {
     return this.groupService.createGroup({ name: dto.name }, req.user!.sub);
   }
 
-  @UseGuards(AuthGuard)
+
   @Get('list')
   getMyGroups(@Req() req: AuthenticatedRequest) {
     return this.groupService.getGroupsByUserId(req.user!.sub);
   }
 
-  @UseGuards(AuthGuard)
+  @Get(':id')
+  async getGroup(@Param('id') groupId: string) {
+    return this.groupService.getGroupById(groupId);
+  }
+
   @Post(':id/invite-link')
   async getInviteLink(@Param('id') groupId: string) {
     return this.groupService.generateInviteLink(groupId);
   }
 
-  @UseGuards(AuthGuard)
   @Post(':id/join')
   async joinGroup(@Param('id') groupId: string, @Req() req: any) {
-    const userId = req.user!.sub; 
+    const userId = req.user!.sub;
     return this.groupService.joinGroup(groupId, userId);
   }
-
-  
 }
