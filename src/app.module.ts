@@ -4,6 +4,7 @@ import { DrizzleModule } from './drizzle/drizzle.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { GroupModule } from './group/group.module.js';
 import { EventModule } from './event/event.module.js';
+import { UserModule } from './user/user.module.js';
 
 
 @Module({
@@ -15,6 +16,7 @@ import { EventModule } from './event/event.module.js';
     AuthModule,
     GroupModule,
     EventModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],
